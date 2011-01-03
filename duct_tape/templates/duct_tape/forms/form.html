@@ -1,0 +1,22 @@
+{% for field in form.visible_fields %}
+    <div class="fieldWrapper span-24 last">
+
+        {# Include the hidden fields in the form #}
+        {% if forloop.first %}
+            {% for hidden in form.hidden_fields %}
+            {{ hidden }}
+            {% endfor %}
+        {% endif %}
+
+        <div class="span-6"><label for="id_{{ field.html_name }}" class="span_2{% if field.errors %} ui-state-error-text{% endif %}">{{ field.label }}</label></div>
+        <div class="span-6{% if not field.errors %} last{% endif %}">{{ field }}</div>
+
+
+        {% if field.errors %}
+        <div id="errors_{{ field.html_name }}" class="ui-state-error span-10 last">
+            {{ field.errors }}
+        </div>
+        {% endif %}
+
+    </div>
+{% endfor %}

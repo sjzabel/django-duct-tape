@@ -1,0 +1,31 @@
+{% for row in csv_data %}
+    {% if forloop.first %}
+    <table>
+        <thead>
+            <tr>
+                {% for th in row %}
+                <th>
+                    {{ th }}
+                </th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+    {% else %}
+            <tr>
+                {% for td in row %}
+                <td>
+                    {{ td }}
+                </td>
+                {% endfor %}
+            </tr>
+
+    {% endif %}
+
+    {% if forloop.last %}
+        </tbody>
+    </table>
+    {% endif %}
+{% empty %}
+    There is no data for this table
+{% endfor %}

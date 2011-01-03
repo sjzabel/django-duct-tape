@@ -1,0 +1,6 @@
+{% for field in form.visible_fields %}
+    <div class="fieldWrapper span-24 last">
+        <div class="span-6"><label for="id_{{ field.html_name }}" class="span_2{% if field.errors %} ui-state-error-text{% endif %}">{{ field.label }}</label></div>
+        <div class="span-6">{{ field }}</div>
+    </div>
+{% endfor %}

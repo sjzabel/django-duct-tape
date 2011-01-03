@@ -1,0 +1,38 @@
+{% load js_behavior %}
+{% spaceless %}
+<div class="pagination">
+    <div class="step-links page-ui-button-set">
+        
+        <a href="{% if page_obj.has_previous %}?page={{ page_obj.previous_page_number }}{% else %}#{% endif %} " class="page-prev-ui-button">&nbsp;</a>
+        <a href='#' class="page-ui-button ui-state-active">{{ page_obj.number }} of {{ paginator.num_pages }}</a>
+        <a href="{% if page_obj.has_next %}?page={{ page_obj.next_page_number }}{% else %}#{% endif %} " class="page-next-ui-button">&nbsp;</a>
+    </div>
+</div>
+{% endspaceless %}
+
+{% behavior_queue pagination %}
+     $( ".pagination .page-prev-ui-button" )
+        .button({
+            icons: {
+                primary:'ui-icon-triangle-1-w'
+            },
+            text: false{% if not page_obj.has_previous %},
+            disabled: true{% endif %}
+        });
+
+     $( ".pagination .page-ui-button" )
+        .button();
+
+     $( ".pagination .page-next-ui-button" )
+        .button({
+            icons: {
+                primary:'ui-icon-triangle-1-e'
+            },
+            text: false{% if not page_obj.has_next %},
+            disabled: true{% endif %}
+        });
+    //$( ".page-ui-button-set")
+    //    .buttonset();
+
+{% endbehavior_queue %}
+
