@@ -78,17 +78,34 @@ class CreatedByModelBase(models.Model):
     """
     created_by = models.ForeignKey(User, related_name='+', editable=False, blank=True, null=True)
 
+    # capture which classes signals need to be listening for
+    _class_signal_dict = {}
+
+    @classmethod
+    def __new__(klass,*args,**kwargs):
+        kls = super(CreatedByModelBase,klass).__new__(klass)
+        if not klass in CreatedByModelBase._class_signal_dict:
+            dispatch_uid = "createdbymodelbase_auto_add_creator__%s.%s" % (klass.__module__, klass.__name__)
+
+            # we don't need to keep the dispatch_uid around but it doesn't hurt
+            CreatedByModelBase._class_signal_dict[klass] = dispatch_uid
+
+            post_save.connect(CreatedByModelBase.auto_add_creator,sender=klass,weak=False,dispatch_uid=dispatch_uid)
+
+        return kls
+    
+    @classmethod
+    def auto_add_creator(klass,sender,**kwargs):
+        instance = kwargs['instance']
+        created = kwargs['created']
+
+        if UserRegistry.has_user() and created:
+            instance.created_by = UserRegistry.get_user()
+            instance.save()
+
     def has_creator(self):
         return not self.created_by==None
     
     class Meta:
         abstract = True
 
-@receiver(post_save,sender=CreatedByModelBase,weak=False,dispatch_uid="CreatedByModelBase_auto_add_creator")
-def auto_add_creator(sender,**kwargs):
-    instance = kwargs['instance']
-    created = kwargs['created']
-
-    if UserRegistry.has_user() and created:
-        instance.created_by = UserRegistry.get_user()
-        instance.save()

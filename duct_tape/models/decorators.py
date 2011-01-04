@@ -11,7 +11,6 @@ def register_pre_and_post_signal(klass,method_name):
          method_names = [method_name]
 
     for name in method_names:
-        print name
         pre_name = "pre_%s" % name
         post_name = "post_%s" % name
 
@@ -22,7 +21,6 @@ def register_pre_and_post_signal(klass,method_name):
 
         @wraps(func)
         def _wrapper(self,*args,**kwargs):
-            print "in wrapper"
             # send the pre signal
             for reciever,response in getattr(klass,pre_name).send(sender=klass, instance=self):
                 if response == False:
