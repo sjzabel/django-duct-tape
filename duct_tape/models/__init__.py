@@ -10,6 +10,55 @@ from duct_tape.models.decorators import register_pre_and_post_signal
 
 from datetime import datetime
 
+class DirtyModelMixin(object):
+    '''
+    Adds concept of *dirty* fields (ala, which fields changed)
+    '''
+
+    def __setattr__(self, name, value):
+        print name
+        print value
+
+        for fld in self._meta.local_fields:
+            if fld.name!=name:          continue
+            if fld.rel:                 continue
+
+            initial_value = None
+            if name in self._modified_attrs:
+                initial_value = self._modified_attrs[name]['initial_value']
+            else:
+                if hasattr(self, name):
+                    initial_value = self.__getattribute__(name)
+
+            if not initial_value:       continue
+            if initial_value==value:    continue
+
+            #checks complete
+            if not self.is_dirty:
+                self.is_dirty = True
+            
+            if name not in self._modified_attrs:
+                self._modified_attrs[name] = {
+                    'initial_value': initial_value
+                }
+
+            self._modified_attrs[name]['value'] = value
+
+        super(DirtyModelMixin, self).__setattr__(name, value)
+
+    def _reset_modified_attrs(self):
+        self.is_dirty = False
+        self._modified_attrs = {} 
+
+    def __init__(self, *args, **kwargs):
+        self._reset_modified_attrs()
+        super(DirtyModelMixin, self).__init__(*args, **kwargs)
+
+    def get_dirty_columns(self):
+        for key, value in self._modified_attrs.iteritems():
+            yield (key,value)
+           
+
 class TimeStampedModelBase(models.Model):
     """
     This is an abstract Model used to provide
