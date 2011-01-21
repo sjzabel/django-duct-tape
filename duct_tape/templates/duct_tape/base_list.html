@@ -1,0 +1,48 @@
+{% extends "duct_tape/layouts/half.html" %}
+{% load url from future %}
+
+{% block content_left %}
+{% spaceless %}
+{% if is_paginated %}
+    <div class='span-12'>
+        {% include "duct_tape/widgets/paging.html" %}
+    </div>
+    <div class='span-11 end'>
+        <a class="ui-button" href="{% url fi_create %}">New</a>
+    </div>
+    <div class="span-24 last"><hr></div>
+
+    {% for obj in page_obj.object_list %}
+        <div class="span-10">
+            <a href="{% url fi_detail obj.id %}?page={{ page_obj.number }}">{{ obj.name }}</a>
+        </div>
+        <div class="span-12 last">
+            <a href="{% url fi_update obj.id %}?page={{ page_obj.number }}">edit</a>&nbsp;|&nbsp;<a 
+            href="{% url fi_delete obj.id %}?page={{ page_obj.number }}">delete</a>
+        </div>
+    {% endfor %}
+
+    <div class="span-24 last"><hr></div>
+    <div class='span-6 last'>
+    {% include "duct_tape/widgets/paging.html" %}
+    </div>
+
+{% else %}
+    <div class='prepend-12 span-11 end'>
+        <a class="ui-button" href="{% url fi_create %}">New</a>
+    </div>
+    <div class="span-24 last"><hr></div>
+    {% for obj in object_list %}
+        <div class="span-10">
+            <a href="{% url fi_detail obj.id %}">{{ obj.accomplishment.title }}</a>
+        </div>
+        <div class="span-12 last">
+            <a href="{% url fi_update obj.id %}">edit</a>&nbsp;|&nbsp;<a 
+            href="{% url fi_delete obj.id %}">delete</a>
+        </div>
+
+    {% endfor %}
+    <div class="span-24 last"><hr></div>
+
+{% endif %}
+{% endspaceless %}{% endblock %}

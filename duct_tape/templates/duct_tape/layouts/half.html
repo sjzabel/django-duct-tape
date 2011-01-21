@@ -1,0 +1,9 @@
+{% extends "base_logged_in.html" %}
+{% block content %}
+    <div id='content_left' class='span-12 section'>
+    {% block content_left %}{% endblock %}
+    </div>
+    <div id='content_right' class='span-12 section last'>
+    {% block content_right %}{% endblock %}
+    </div>
+{% endblock %}

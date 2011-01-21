@@ -1,0 +1,16 @@
+{% extends "duct_tape/layouts/half.html" %}
+{% load comments %}
+{% load url from future %}
+
+{% block content_left %}
+    {% include "duct_tape/forms/form_ro_half.html" %}
+    <div class="span-12 last container">
+        <div class='ui-button-set'>
+            <a class='ui-button' href="{% url fi_list %}">Return to List</a>
+            <a class='ui-button' href="{% url fi_update obj.id %}">Edit</a>
+        </div>
+    </div>
+
+    {% render_comment_list for obj %}
+    {% render_comment_form for obj %}
+{% endblock %}

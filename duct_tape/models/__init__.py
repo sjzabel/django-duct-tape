@@ -16,9 +16,6 @@ class DirtyModelMixin(object):
     '''
 
     def __setattr__(self, name, value):
-        print name
-        print value
-
         for fld in self._meta.local_fields:
             if fld.name!=name:          continue
             if fld.rel:                 continue
@@ -54,10 +51,8 @@ class DirtyModelMixin(object):
         self._reset_modified_attrs()
         super(DirtyModelMixin, self).__init__(*args, **kwargs)
 
-    def get_dirty_columns(self):
-        for key, value in self._modified_attrs.iteritems():
-            yield (key,value)
-           
+    def get_dirty_fields(self):
+        return [(key, value) for key, value in self._modified_attrs.iteritems()]
 
 class TimeStampedModelBase(models.Model):
     """
@@ -65,8 +60,8 @@ class TimeStampedModelBase(models.Model):
         created_at
         updated_at
     """
-    created_at = models.DateTimeField(auto_now=True, blank=False, null=False)
-    updated_at = models.DateTimeField(auto_now_add=True, auto_now=True, blank=False, null=False)
+    created_at = models.DateTimeField(auto_now_add=True, blank=False, null=False)
+    updated_at = models.DateTimeField(auto_now=True, blank=False, null=False)
 
     class Meta:
         abstract = True
