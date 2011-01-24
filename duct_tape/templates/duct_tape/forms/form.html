@@ -9,11 +9,11 @@
         {% endif %}
 
         <div class="span-6"><label for="id_{{ field.html_name }}" class="span_2{% if field.errors %} ui-state-error-text{% endif %}">{{ field.label }}</label></div>
-        <div class="span-6{% if not field.errors %} last{% endif %}">{{ field }}</div>
+        <div class="span-{% if not field.errors %}16 last{% else %}10{% endif %}">{{ field }}</div>
 
 
         {% if field.errors %}
-        <div id="errors_{{ field.html_name }}" class="ui-state-error span-10 last">
+        <div id="errors_{{ field.html_name }}" class="ui-state-error span-6 last">
             {{ field.errors }}
         </div>
         {% endif %}

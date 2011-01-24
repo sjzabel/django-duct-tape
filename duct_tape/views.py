@@ -1,5 +1,5 @@
 from django.core.exceptions import ImproperlyConfigured
-from django.core.urlresolveeers import reverse
+from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from duct_tape.lib.template_queue import TemplateQueue
@@ -19,6 +19,7 @@ class ModelUrlPathMixin(object):
     url_detail_path='detail'
     url_update_path='update'
     url_delete_path='delete'
+    url_create_path='create'
 
     def get_context_data(self, **kwargs):
         context = super(ModelUrlPathMixin,self).get_context_data(**kwargs)
@@ -27,6 +28,7 @@ class ModelUrlPathMixin(object):
         context['url_detail_path'] = self.url_detail_path
         context['url_update_path'] = self.url_update_path
         context['url_delete_path'] = self.url_delete_path
+        context['url_create_path'] = self.url_create_path
 
         return context
 

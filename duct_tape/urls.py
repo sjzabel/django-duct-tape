@@ -20,16 +20,20 @@ class BaseGenericViewEngine(object):
         if not app_path=="":
             app_path += ':'
 
-        app_path +=model_name
+        if not alternate_url_prefix:
+            alternate_url_prefix = model_name
+
+        app_path += alternate_url_prefix
 
         view_data = {
-            'model':klass,
+            'model':model,
             'context_object_name':'obj',
             # these require the ModelUrlPathMixin
             'url_list_path':"%s:list"%app_path,
             'url_detail_path':"%s:detail"%app_path,
             'url_update_path':"%s:update"%app_path,
             'url_delete_path':"%s:delete"%app_path,
+            'url_create_path':"%s:create"%app_path,
         }
 
         view_data.update(**kwargs)
@@ -51,6 +55,8 @@ class BaseGenericViewEngine(object):
 
         # now create the view
         list_view = klass.list_view_klass.as_view(**list_view_data)
+        if isinstance(list_view, (list,tuple)):
+            list_view = detail_view[0]
 
         # --create--
         # gather the data
@@ -59,10 +65,12 @@ class BaseGenericViewEngine(object):
         }
         create_view_data.update(view_data)
         if 'create' in specific_view_overrides:
-            list_view_data.update(specific_view_overrides['create'])
+            create_view_data.update(specific_view_overrides['create'])
 
         # now create the view
         create_view = klass.create_view_klass.as_view(**create_view_data), 
+        if isinstance(create_view, (list,tuple)):
+            create_view = create_view[0]
 
         # --detail--
         # gather the data
@@ -71,12 +79,14 @@ class BaseGenericViewEngine(object):
         }
         detail_view_data.update(view_data)
         if 'detail' in specific_view_overrides:
-            list_view_data.update(specific_view_overrides['detail'])
+            detail_view_data.update(specific_view_overrides['detail'])
 
         # now create the view
         # note : I use the UpdateView for detail so that there is access to the form
         #        for iterating over fields and whatnot
         detail_view = klass.update_view_klass.as_view(**detail_view_data), 
+        if isinstance(detail_view, (list,tuple)):
+            detail_view = detail_view[0]
 
         # --update--
         # gather the data
@@ -85,30 +95,28 @@ class BaseGenericViewEngine(object):
         }
         update_view_data.update(view_data)
         if 'update' in specific_view_overrides:
-            list_view_data.update(specific_view_overrides['update'])
+            update_view_data.update(specific_view_overrides['update'])
 
         # now create the view
         update_view = klass.update_view_klass.as_view(**update_view_data), 
-
+        if isinstance(update_view, (list,tuple)):
+            update_view = update_view[0]
 
         # --delete--
         # gather the data
         delete_view_data = {
                 'template_name':'duct_tape/base_confirm_delete.html',
-                success_url:'%s:list'%app_path,
+                'success_url':'%s:list'%app_path,
         }
-        delete_view_data.delete(view_data)
+        delete_view_data.update(view_data)
         if 'delete' in specific_view_overrides:
-            list_view_data.delete(specific_view_overrides['delete'])
+            delete_view_data.delete(specific_view_overrides['delete'])
 
         # now create the view
         delete_view = klass.delete_view_klass.as_view(**delete_view_data), 
+        if isinstance(delete_view, (list,tuple)):
+            delete_view = delete_view[0]
 
-        delete_view = klass.delete_view_klass.as_view(
-                        **_view_data), 
-
-        if not alternate_url_prefix:
-            alternate_url_prefix = model_name
         return patterns('',
             (r'^%s/'%alternate_url_prefix,
                 include(
