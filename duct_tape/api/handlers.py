@@ -7,6 +7,10 @@ from piston.utils import rc
 from django.db.models.manager import Manager
 from django.db.models.query import QuerySet
 
+from django.db.models import Q
+
+import operator
+
 def _get_queryset(klass):
     """
     Returns a QuerySet from a Model, Manager, or QuerySet. Created to make
@@ -62,8 +66,6 @@ from piston.handler import BaseHandler as PistonBaseHandler
 
 class BaseHandler(PistonBaseHandler):
     def read(self,request,pk=None):
-        print "BASE GET"
-        print "BASE pk:%s:" % pk
         # on GET
         if pk:
             return get_object_or_404(self.model,pk=pk)
@@ -81,3 +83,39 @@ class BaseHandler(PistonBaseHandler):
     def delete(self,request,pk):
         # on DELETE
         pass
+
+class BaseAutoCompleterHandler(BaseHandler):
+    search_fields = None
+    
+    def get_value_and_label(self,obj):
+        return {'label':str(obj),
+                 'value':obj.pk}
+
+    def read(self,request):
+        qs = super(BaseAutoCompleterHandler,self).read(request,pk=None)
+        term = request.GET['term']
+
+        # Apply keyword searches.
+        def construct_search(field_name):
+            if field_name.startswith('^'):
+                return "%s__istartswith" % field_name[1:]
+            elif field_name.startswith('='):
+                return "%s__iexact" % field_name[1:]
+            elif field_name.startswith('@'):
+                return "%s__search" % field_name[1:]
+            else:
+                return "%s__icontains" % field_name
+
+        if self.__class__.search_fields:
+            or_queries = [Q(**{construct_search(str(field_name)): term}) for field_name in self.search_fields]
+
+            qs = qs.filter(reduce(operator.or_, or_queries))
+            for field_name in self.search_fields:
+                if '__' in field_name:
+                    qs = qs.distinct()
+                    break
+
+        rows = [self.get_value_and_label(obj) for obj in qs]
+
+        return rows
+
