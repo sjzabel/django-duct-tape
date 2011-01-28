@@ -16,12 +16,15 @@ class BaseGenericViewEngine(object):
 
     @classmethod
     def get_patterns(klass,model,app_path,specific_view_overrides=None,alternate_url_prefix=None,**kwargs):
+        api_path = app_path
+
         model_name = model.__name__.lower() 
         if not app_path=="":
             app_path += ':'
 
         if not alternate_url_prefix:
             alternate_url_prefix = model_name
+
 
         app_path += alternate_url_prefix
 
@@ -34,6 +37,7 @@ class BaseGenericViewEngine(object):
             'url_update_path':"%s:update"%app_path,
             'url_delete_path':"%s:delete"%app_path,
             'url_create_path':"%s:create"%app_path,
+            'url_api_autocomplete_path':"%s:api:%s:autocomplete_list"%(api_path,alternate_url_prefix),
         }
 
         view_data.update(**kwargs)

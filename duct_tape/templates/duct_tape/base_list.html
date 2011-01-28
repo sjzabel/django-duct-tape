@@ -1,8 +1,33 @@
 {% extends "duct_tape/layouts/full.html" %}
 {% load url from future %}
+{% load js_behavior %}
 
 {% block content %}
 {% spaceless %}
+{% if url_api_autocomplete_path %}
+    <div class="span-24 last"><hr></div>
+    <div class="span-24 last container">
+        <label class='span-2'>Search</label>
+        <div class='span-22 last'>
+            <input id='search'class='span-10'> 
+        </div>
+    </div>
+    {% behavior_queue search_js %}
+$( "#search" ).autocomplete({
+    source: jsurls.get_named_path('{{ url_api_autocomplete_path }}'),
+    minLength:3,
+    select: function(event,ui){
+        if(ui.item){
+            var url = jsurls.get_named_path('{{ url_api_autocomplete_path }}',ui.item.value);
+            document.location.href = url;
+
+            return false
+        }
+    }
+});
+    {% endbehavior_queue %}
+    <div class="span-24 last"><hr></div>
+{% endif %}
 {% if is_paginated %}
     <div class='span-12'>
         {% include "duct_tape/widgets/paging.html" %}

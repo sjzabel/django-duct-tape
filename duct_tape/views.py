@@ -20,6 +20,7 @@ class ModelUrlPathMixin(object):
     url_update_path='update'
     url_delete_path='delete'
     url_create_path='create'
+    url_api_autocomplete_path='api:foo:autocomplete_list'
 
     def get_context_data(self, **kwargs):
         context = super(ModelUrlPathMixin,self).get_context_data(**kwargs)
@@ -29,6 +30,7 @@ class ModelUrlPathMixin(object):
         context['url_update_path'] = self.url_update_path
         context['url_delete_path'] = self.url_delete_path
         context['url_create_path'] = self.url_create_path
+        context['url_api_autocomplete_path'] = self.url_api_autocomplete_path
 
         return context
 
