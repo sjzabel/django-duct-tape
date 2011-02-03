@@ -4,7 +4,7 @@ from django.utils import formats
 from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
 from itertools import chain
-
+from django.core.urlresolvers import reverse
 
 class ViewWidget(widgets.Widget):
     def _format_value(self, value):
@@ -22,33 +22,29 @@ class ViewWidget(widgets.Widget):
         return mark_safe(u'<span %s >%s</span>' % (flatatt(final_attrs),value))
 
 class ViewFKWidget(widgets.Select):
-    def __init__(self, attrs=None, choices=()):
+    def __init__(self, attrs=None, choices=(),url_path=None):
         super(ViewFKWidget,self).__init__(attrs=attrs,choices=choices)
         self.selected_labels = []
+        self.url_path = url_path
+
+
+    def _format(self,v,label):
+        if self.url_path:
+            return "<a href='%s'>%s</a>"%(reverse(self.url_path,args=[v]),label)
+        else:
+            return label
 
     def render(self, name, value, attrs=None, choices=()):
-        # print "---------------"
-        # print "render"
-        # print "---------------"
-        # print name
-        # print value
-        # print attrs
-        # print choices
         super(ViewFKWidget,self).render(name, value, attrs=attrs, choices=choices)
         # print output
-        return ", ".join(self.selected_labels)
+        return mark_safe(u", ".join(self.selected_labels))
 
     def render_options(self, choices, selected_choices):
         selected_choices = set([force_unicode(v) for v in selected_choices])
-        self.selected_labels = [label for v,label in chain(self.choices, choices) if force_unicode(v) in selected_choices]
+        self.selected_labels = [self._format(v,label) for v,label in chain(self.choices, choices) if force_unicode(v) in selected_choices]
         #print selected_choices
         return ""
 
-    #def _format_value(self, value):
-    #    if self.klass:
-    #        value = self.klass.objects.get(pk=value)
-    #        
-    #    return value
 
 class ViewTextWidget(widgets.Widget):
     def _format_value(self, value):
