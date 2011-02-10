@@ -21,6 +21,21 @@ class ViewWidget(widgets.Widget):
             value = force_unicode(self._format_value(value))
         return mark_safe(u'<span %s >%s</span>' % (flatatt(final_attrs),value))
 
+class ViewURLWidget(widgets.Widget):
+    def _format_value(self, value):
+        if self.is_localized:
+            return formats.localize_input(value)
+        return value
+
+    def render(self, name, value, attrs=None):
+        if value is None:
+            value = ''
+        final_attrs = self.build_attrs(attrs, name=name)
+        if value != '':
+            # Only add the 'value' attribute if a value is non-empty.
+            value = force_unicode(self._format_value(value))
+        return mark_safe(u'<span %s ><a href="%s">%s</a></span>' % (flatatt(final_attrs),value,value))
+
 class ViewFKWidget(widgets.Select):
     def __init__(self, attrs=None, choices=(),url_path=None):
         super(ViewFKWidget,self).__init__(attrs=attrs,choices=choices)
