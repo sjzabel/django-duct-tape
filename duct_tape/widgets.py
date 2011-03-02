@@ -44,7 +44,7 @@ class ViewFKWidget(widgets.Select):
 
 
     def _format(self,v,label):
-        if self.url_path:
+        if self.url_path and v != '':
             return "<a href='%s'>%s</a>"%(reverse(self.url_path,args=[v]),label)
         else:
             return label
