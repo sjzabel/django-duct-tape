@@ -18,7 +18,7 @@ $( "#search" ).autocomplete({
     minLength:3,
     select: function(event,ui){
         if(ui.item){
-            var url = jsurls.get_named_path('{{ url_api_autocomplete_path }}',ui.item.value);
+            var url = jsurls.get_named_path('{{ url_detail_path }}',ui.item.value);
             document.location.href = url;
 
             return false
