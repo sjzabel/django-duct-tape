@@ -42,8 +42,8 @@ $( "#search" ).autocomplete({
             <a href="{% url url_detail_path obj.id %}?page={{ page_obj.number }}">{{ obj.name }}</a>
         </div>
         <div class="span-12 last">
-            <a href="{% url url_update_path obj.id %}?page={{ page_obj.number }}">edit</a>&nbsp;|&nbsp;<a 
-            href="{% url url_delete_path obj.id %}?page={{ page_obj.number }}">delete</a>
+            <a href="{% url url_update_path obj.id %}?page={{ page_obj.number }}" class='icon-only page_edit'>&nbsp;</a>
+           {# comment &nbsp;|&nbsp;<a href="{% url url_delete_path obj.id %}?page={{ page_obj.number }}">delete</a> #}
         </div>
     {% endfor %}
 
