@@ -3,6 +3,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from duct_tape.lib.template_queue import TemplateQueue
+from anyjson import deserialize
 
 class JSBehaviorQueueMixin(object):
     def get_context_data(self, **kwargs):
@@ -55,3 +56,18 @@ class NamedUrlDeletionMixin(object):
         else:
             raise ImproperlyConfigured(
                 "No URL to redirect to. Provide a success_url.")
+
+class MultipleObjectFilterMixin(object):
+    '''
+    Used to provide generic list views a way of filtering
+
+    Provides a mechanism for passing a filter_string through the request
+    '''
+
+    def get_queryset(self,*args,**kwargs):
+        super(MultipleObjectFilterMixin,self).get_queryset(*args,**kwargs)
+        qs = self.queryset
+        if 'filter' in self.request.GET:
+            data = deserialize(self.request.GET['filter'])
+            qs=qs.filter(**data)
+        return qs.all()
