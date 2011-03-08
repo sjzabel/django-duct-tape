@@ -153,3 +153,46 @@ class CreatedByModelBase(models.Model):
     class Meta:
         abstract = True
 
+class StandardNamedUrlModelMixin(object):
+    @models.permalink
+    def get_absolute_url(self):
+        return ('%s:%s:detail'%(
+            self.__class__._meta.app_label,
+            self.__class__.__name__.lower()
+            ),[str(self.id)])
+
+    @models.permalink
+    def get_absolute_detail(self):
+        return ('%s:%s:detail'%(
+            self.__class__._meta.app_label,
+            self.__class__.__name__.lower()
+            ),[str(self.id)])
+
+    @models.permalink
+    def get_absolute_update(self):
+        return ('%s:%s:update'%(
+            self.__class__._meta.app_label,
+            self.__class__.__name__.lower()
+            ),[str(self.id)])
+
+    @models.permalink
+    def get_absolute_new(self):
+        return ('%s:%s:new'%(
+            self.__class__._meta.app_label,
+            self.__class__.__name__.lower()
+            ),[str(self.id)])
+
+    @models.permalink
+    def get_absolute_delete(self):
+        return ('%s:%s:delete'%(
+            self.__class__._meta.app_label,
+            self.__class__.__name__.lower()
+            ),[str(self.id)])
+
+    @models.permalink
+    def get_absolute_list(self):
+        return ('%s:%s:list'%(
+            self.__class__._meta.app_label,
+            self.__class__.__name__.lower()
+            ),[str(self.id)])
+
