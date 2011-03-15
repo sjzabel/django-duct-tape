@@ -39,7 +39,7 @@ $( "#search" ).autocomplete({
 
     {% for obj in page_obj.object_list %}
         <div class="span-10">
-            <a href="{% url url_detail_path obj.id %}?page={{ page_obj.number }}">{{ obj.name }}</a>
+            <a href="{% url url_detail_path obj.id %}?page={{ page_obj.number }}">{{ obj }}</a>
         </div>
         <div class="span-12 last">
             <a href="{% url url_update_path obj.id %}?page={{ page_obj.number }}" class='icon-only page_edit'>&nbsp;</a>

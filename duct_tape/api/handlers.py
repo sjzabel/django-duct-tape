@@ -78,7 +78,12 @@ class BaseHandler(PistonBaseHandler):
 
     def update(self,request,pk):
         # on PUT
-        pass
+        if pk:
+            return get_object_or_404(self.model,pk=pk)
+        else:
+            resp = rc.NOT_FOUND
+            resp.write('No %s matches the given query.' % self.model._meta.object_name)
+            return resp
 
     def delete(self,request,pk):
         # on DELETE

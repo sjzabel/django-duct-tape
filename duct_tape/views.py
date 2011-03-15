@@ -41,18 +41,27 @@ class LoginRequiredMixin(object):
     def dispatch(self,request, *args, **kwargs ):
         return super(LoginRequiredMixin, self).dispatch(request, *args, **kwargs)
 
-class NamedUrlDeletionMixin(object):
+class NamedUrlOnSuccessMixin(object):
     '''
     This mixin trys reverse on the success_url
     and falls back to the original method if there is no success
     '''
     def get_success_url(self):
-        if self.success_url:
-            url = reverse(self.success_url)
-            if url:
+        '''
+         first look for a param called next
+        '''
+        if 'next' in self.request.POST:
+            try:
+                url = reverse(self.request.POST['next'])
                 return url
-            else:
-                return super(NamedUrlDeletionMixin,self).get_success_url()
+            except:
+                return self.request.POST['next']
+        elif self.success_url:
+            try:
+                reverse(self.success_url)
+                return url
+            except:
+                return super(NamedUrlOnSuccessMixin,self).get_success_url()
         else:
             raise ImproperlyConfigured(
                 "No URL to redirect to. Provide a success_url.")

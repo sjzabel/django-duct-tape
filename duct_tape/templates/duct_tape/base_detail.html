@@ -1,6 +1,9 @@
 {% extends "duct_tape/layouts/half.html" %}
 {% load comments %}
 {% load url from future %}
+{% block title %}
+ID {{ obj }}
+{% endblock %}
 
 {% block content_left %}
     {% include "duct_tape/forms/form_half.html" %}
