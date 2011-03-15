@@ -1,6 +1,6 @@
 {% extends "duct_tape/layouts/full.html" %}
 {% load url from future %}
-{% load comments %}
+{% load note_tags %}
 
 {% block content %}
 <form method="post" action="">
@@ -14,6 +14,6 @@
     </div>
 </form>
 {% if obj.pk %}
-    {% render_comment_list for obj %}
+    {% render_note_list for obj %}
 {% endif %}
 {% endblock %}

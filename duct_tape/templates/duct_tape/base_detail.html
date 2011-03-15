@@ -1,5 +1,5 @@
 {% extends "duct_tape/layouts/half.html" %}
-{% load comments %}
+{% load note_tags %}
 {% load url from future %}
 {% block title %}
 ID {{ obj }}
@@ -14,6 +14,6 @@ ID {{ obj }}
         </div>
     </div>
 
-    {% render_comment_list for obj %}
-    {% render_comment_form for obj %}
+    {% render_note_list for obj %}
+    {% render_note_form for obj %}
 {% endblock %}
