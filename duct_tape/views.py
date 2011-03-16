@@ -63,8 +63,7 @@ class NamedUrlOnSuccessMixin(object):
             except:
                 return super(NamedUrlOnSuccessMixin,self).get_success_url()
         else:
-            raise ImproperlyConfigured(
-                "No URL to redirect to. Provide a success_url.")
+            return super(NamedUrlOnSuccessMixin,self).get_success_url()
 
 class MultipleObjectFilterMixin(object):
     '''
