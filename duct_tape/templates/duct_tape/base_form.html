@@ -2,6 +2,9 @@
 {% load url from future %}
 {% load note_tags %}
 
+{% block title %}
+ID {% if object %}Edit - {{ object }}{% else %}Create{% endif %}
+{% endblock %}
 {% block content %}
 <form method="post" action="">
     {% csrf_token %}

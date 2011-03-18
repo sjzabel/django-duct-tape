@@ -1,6 +1,10 @@
 {% extends "duct_tape/layouts/half.html" %}
 {% load url from future %}
 
+{% block title %}
+ID Delete - {{ obj }}
+{% endblock %}
+
 {% block content_left %}
 <form method="post" action="">
     {% csrf_token %}
