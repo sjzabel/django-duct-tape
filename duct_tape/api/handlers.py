@@ -65,29 +65,23 @@ def get_list_or_404(klass, *args, **kwargs):
 from piston.handler import BaseHandler as PistonBaseHandler
 
 class BaseHandler(PistonBaseHandler):
-    def read(self,request,pk=None):
+    def read(self,request,id=None):
         # on GET
-        if pk:
-            return get_object_or_404(self.model,pk=pk)
+        if id:
+            return get_object_or_404(self.model,pk=id)
         else:
             return self.model.objects.all()
 
-    def create(self,request):
-        # on POST
-        pass
+    def create(self,request,*args,**kwargs):
+        return super(BaseHandler,self).create(request,*args,**kwargs)
 
-    def update(self,request,pk):
+    def update(self,request,*args,**kwargs):
         # on PUT
-        if pk:
-            return get_object_or_404(self.model,pk=pk)
-        else:
-            resp = rc.NOT_FOUND
-            resp.write('No %s matches the given query.' % self.model._meta.object_name)
-            return resp
+        return super(BaseHandler,self).update(request,*args,**kwargs)
 
-    def delete(self,request,pk):
+    def delete(self,request,*args,**kwargs):
         # on DELETE
-        pass
+        return super(BaseHandler,self).delete(request,*args,**kwargs)
 
 class BaseAutoCompleterHandler(BaseHandler):
     search_fields = None
@@ -97,7 +91,7 @@ class BaseAutoCompleterHandler(BaseHandler):
                  'value':obj.pk}
 
     def read(self,request):
-        qs = super(BaseAutoCompleterHandler,self).read(request,pk=None)
+        qs = super(BaseAutoCompleterHandler,self).read(request)
         term = request.GET['term']
 
         # Apply keyword searches.

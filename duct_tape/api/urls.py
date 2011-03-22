@@ -59,7 +59,7 @@ class BaseGenericAPIEngine(object):
                     patterns('',
                         url(r'^$', handler, name='list'),
                         url(r'^autocomplete/$', auto_complete_handler, name='autocomplete_list'),
-                        url(r'^(?P<pk>\d+)/$', handler, name='show'),
+                        url(r'^(?P<id>\d+)/$', handler, name='show'),
                     ), namespace=alternate_url_prefix, app_name=alternate_url_prefix
                 )
             ),
