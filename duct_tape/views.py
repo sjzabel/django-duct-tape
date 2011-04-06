@@ -50,12 +50,12 @@ class NamedUrlOnSuccessMixin(object):
         '''
          first look for a param called next
         '''
-        if 'next' in self.request.POST:
+        if 'next' in self.request.REQUEST:
             try:
-                url = reverse(self.request.POST['next'])
+                url = reverse(self.request.REQUEST['next'])
                 return url
             except:
-                return self.request.POST['next']
+                return self.request.REQUEST['next']
         elif self.success_url:
             try:
                 reverse(self.success_url)

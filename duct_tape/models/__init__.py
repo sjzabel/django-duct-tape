@@ -66,6 +66,16 @@ class TimeStampedModelBase(models.Model):
     class Meta:
         abstract = True
 
+class DeletableDeletedModelManager(models.Manager):
+    def get_query_set(self):
+        return super(DeletableDeletedModelManager,self
+                ).get_query_set().exclude(deleted_at__isnull=True)
+
+class DeletableNotDeletedModelManager(models.Manager):
+    def get_query_set(self):
+        return super(DeletableNotDeletedModelManager,self
+                ).get_query_set().filter(deleted_at__isnull=True)
+
 class DeletableModelBase(models.Model):
     """
     This is an abstract Model used to provide
@@ -78,6 +88,11 @@ class DeletableModelBase(models.Model):
         but is never actually deleted
     """
     deleted_at = models.DateTimeField(blank=True, null=True, editable=False)
+    
+    #managers
+    objects = DeletableNotDeletedModelManager()
+    deleted_objects = DeletableDeletedModelManager()
+    all_objects = models.Manager()
 
 
     def delete(self):
