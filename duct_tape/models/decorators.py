@@ -8,9 +8,9 @@ def register_pre_and_post_signal(klass,method_name):
         method_names = method_name
 
     else:
-         method_names = [method_name]
+        method_names = [method_name]
 
-    for name in method_names:
+    def _wrap(name,klass):
         pre_name = "pre_%s" % name
         post_name = "post_%s" % name
 
@@ -35,3 +35,6 @@ def register_pre_and_post_signal(klass,method_name):
             return rslt
 
         setattr(klass,name,_wrapper)
+
+    for name in method_names:
+        _wrap(name,klass)

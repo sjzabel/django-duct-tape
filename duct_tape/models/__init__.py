@@ -54,7 +54,7 @@ class DirtyModelMixin(object):
     def get_dirty_fields(self):
         return [(key, value) for key, value in self._modified_attrs.iteritems()]
 
-class TimeStampedModelBase(models.Model):
+class TimeStampedModelMixin(models.Model):
     """
     This is an abstract Model used to provide
         created_at
@@ -62,9 +62,46 @@ class TimeStampedModelBase(models.Model):
     """
     created_at = models.DateTimeField(auto_now_add=True, blank=False, null=False)
     updated_at = models.DateTimeField(auto_now=True, blank=False, null=False)
-
+    
     class Meta:
         abstract = True
+
+class CreatedByModelMixin(object):
+    """
+    This is an abstract Model used to provide
+        created_by
+        has_creator flag (which is used by CreatedByModelFormMixin)
+    """
+    created_by = models.ForeignKey(User, related_name='+', editable=False, blank=True, null=True)
+
+    # capture which classes signals need to be listening for
+    _class_signal_dict = {}
+
+    @classmethod
+    def __new__(klass,*args,**kwargs):
+        kls = super(CreatedByModelMixin,klass).__new__(klass)
+        if not klass in CreatedByModelMixin._class_signal_dict:
+            dispatch_uid = "createdbymodelbase_auto_add_creator__%s.%s" % (klass.__module__, klass.__name__)
+
+            # we don't need to keep the dispatch_uid around but it doesn't hurt
+            CreatedByModelMixin._class_signal_dict[klass] = dispatch_uid
+
+            post_save.connect(CreatedByModelMixin.auto_add_creator,sender=klass,weak=False,dispatch_uid=dispatch_uid)
+
+        return kls
+    
+    @classmethod
+    def auto_add_creator(klass,sender,**kwargs):
+        instance = kwargs['instance']
+        created = kwargs['created']
+
+        if UserRegistry.has_user() and created:
+            instance.created_by = UserRegistry.get_user()
+            instance.save()
+
+    def has_creator(self):
+        return not self.created_by==None
+
 
 class DeletableDeletedModelManager(models.Manager):
     def get_query_set(self):
@@ -93,6 +130,9 @@ class DeletableModelBase(models.Model):
     objects = DeletableNotDeletedModelManager()
     deleted_objects = DeletableDeletedModelManager()
     all_objects = models.Manager()
+    
+    class Meta:
+        abstract = True
 
 
     def delete(self):
@@ -123,50 +163,8 @@ class DeletableModelBase(models.Model):
 
     def is_deleted(self):
         return self.deleted_at != None
-    
-    class Meta:
-        abstract = True
 
-register_pre_and_post_signal(DeletableModelBase,['delete','restore'])
-
-class CreatedByModelBase(models.Model):
-    """
-    This is an abstract Model used to provide
-        created_by
-        has_creator flag (which is used by CreatedByModelFormMixin)
-    """
-    created_by = models.ForeignKey(User, related_name='+', editable=False, blank=True, null=True)
-
-    # capture which classes signals need to be listening for
-    _class_signal_dict = {}
-
-    @classmethod
-    def __new__(klass,*args,**kwargs):
-        kls = super(CreatedByModelBase,klass).__new__(klass)
-        if not klass in CreatedByModelBase._class_signal_dict:
-            dispatch_uid = "createdbymodelbase_auto_add_creator__%s.%s" % (klass.__module__, klass.__name__)
-
-            # we don't need to keep the dispatch_uid around but it doesn't hurt
-            CreatedByModelBase._class_signal_dict[klass] = dispatch_uid
-
-            post_save.connect(CreatedByModelBase.auto_add_creator,sender=klass,weak=False,dispatch_uid=dispatch_uid)
-
-        return kls
-    
-    @classmethod
-    def auto_add_creator(klass,sender,**kwargs):
-        instance = kwargs['instance']
-        created = kwargs['created']
-
-        if UserRegistry.has_user() and created:
-            instance.created_by = UserRegistry.get_user()
-            instance.save()
-
-    def has_creator(self):
-        return not self.created_by==None
-    
-    class Meta:
-        abstract = True
+register_pre_and_post_signal(DeletableModelBase,['restore','delete'])
 
 class StandardNamedUrlModelMixin(object):
     @models.permalink
