@@ -19,7 +19,7 @@ class ViewWidget(widgets.Widget):
         if value != '':
             # Only add the 'value' attribute if a value is non-empty.
             value = force_unicode(self._format_value(value))
-        return mark_safe(u'<span %s >%s</span>' % (flatatt(final_attrs),value))
+        return mark_safe(u'<span %s >%s</span><input type="hidden" value="%s" name="%s"/>' % (flatatt(final_attrs),value,value,name))
 
 class ViewURLWidget(widgets.Widget):
     def _format_value(self, value):
@@ -34,7 +34,7 @@ class ViewURLWidget(widgets.Widget):
         if value != '':
             # Only add the 'value' attribute if a value is non-empty.
             value = force_unicode(self._format_value(value))
-        return mark_safe(u'<span %s ><a href="%s">%s</a></span>' % (flatatt(final_attrs),value,value))
+        return mark_safe(u'<span %s ><a href="%s">%s</a></span><input type="hidden" value="%s" name="%s"/>' % (flatatt(final_attrs),value,value,value,name))
 
 class ViewFKWidget(widgets.Select):
     def __init__(self, attrs=None, choices=(),url_path=None):
@@ -45,11 +45,12 @@ class ViewFKWidget(widgets.Select):
 
     def _format(self,v,label):
         if self.url_path and v != '':
-            return "<a href='%s'>%s</a>"%(reverse(self.url_path,args=[v]),label)
+            return "<a href='%s'>%s</a><input type='hidden' value='%s' name='%s'/>"%(reverse(self.url_path,args=[v]),label,v,self.name)
         else:
-            return label
+            return "%s<input type='hidden' value='%s' name='%s'/>"%(label,v,self.name)
 
     def render(self, name, value, attrs=None, choices=()):
+        self.name = name
         super(ViewFKWidget,self).render(name, value, attrs=attrs, choices=choices)
         # print output
         return mark_safe(u", ".join(self.selected_labels))
@@ -74,5 +75,5 @@ class ViewTextWidget(widgets.Widget):
         if value != '':
             # Only add the 'value' attribute if a value is non-empty.
             value = force_unicode(self._format_value(value))
-        return mark_safe(u'<blockquotes><span %s >%s</span></blockquotes>' % (flatatt(final_attrs),value))
+        return mark_safe(u'<blockquotes><span %s >%s</span></blockquotes><a href="%s">%s</a></span><input type="hidden" value="%s" name="%s"/>' % (flatatt(final_attrs),value,value,name))
 
