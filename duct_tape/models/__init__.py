@@ -63,8 +63,6 @@ class TimeStampedModelMixin(models.Model):
     class Meta:
         abstract = True
 
-
-
 class DeletableDeletedModelManager(models.Manager):
     def get_query_set(self):
         return super(DeletableDeletedModelManager,self
