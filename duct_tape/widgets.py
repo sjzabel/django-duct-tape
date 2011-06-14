@@ -75,5 +75,13 @@ class ViewTextWidget(widgets.Widget):
         if value != '':
             # Only add the 'value' attribute if a value is non-empty.
             value = force_unicode(self._format_value(value))
-        return mark_safe(u'<blockquotes><span %s >%s</span></blockquotes><a href="%s">%s</a></span><input type="hidden" value="%s" name="%s"/>' % (flatatt(final_attrs),value,value,name))
+        return mark_safe(u'''
+        <blockquotes>
+            <span %s >%s</span>
+        </blockquotes>
+        <input type="hidden" value="%s" name="%s"/>''' % (
+            flatatt(final_attrs),
+            value,
+            value,
+            name))
 
