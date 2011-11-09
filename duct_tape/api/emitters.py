@@ -1,4 +1,6 @@
 from piston.emitters import Emitter
+import logging
+log = logging.getLogger('console.debug')
 
 class CSVEmitter(Emitter):
     def render(self,request):
@@ -16,8 +18,16 @@ class ExtJSONEmitter(Emitter):
     """
     def render(self, request):
         cb = request.GET.get('callback')
+
+        totalCount = False
+        if hasattr(self,'data') and hasattr(self.data,'__len__') and len(self.data)==2:
+           totalCount,self.data= self.data
         ext_dict = {'success': True, 'data': self.construct()}
-        seria = simplejson.dumps(ext_dict, cls=DateTimeAwareJSONEncoder, ensure_ascii=False, indent=4)
+        if totalCount:
+            ext_dict['totalCount'] = totalCount
+
+        seria = simplejson.dumps(
+                ext_dict, cls=DateTimeAwareJSONEncoder, ensure_ascii=False, indent=4)
 
         # Callback
         if cb:

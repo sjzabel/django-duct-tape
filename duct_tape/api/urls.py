@@ -1,6 +1,60 @@
 from django.conf.urls.defaults import *
 from duct_tape.api.handlers import BaseHandler, BaseAutoCompleterHandler
+from duct_tape.api.handlers import BaseExtHandler
 from piston.resource import Resource
+
+
+class BaseGenericExtAPIEngine(object):
+    # you will have to extend the view classes and then override these
+    handler_klass = BaseExtHandler
+
+    @classmethod
+    def get_patterns(
+            klass,
+            model,
+            app_path,
+            alternate_url_prefix=None,
+            fields=None,
+            search_fields=None,
+            **kwargs):
+
+        model_name = model.__name__.lower() 
+        if not app_path=="":
+            app_path += ':'
+
+        if not alternate_url_prefix:
+            alternate_url_prefix = model_name
+
+        app_path += alternate_url_prefix
+
+
+        # Create Handler
+        # Give this new form class a reasonable name.
+        handler_class_name = model.__name__ + 'Handler'
+
+        # Class attributes for the new form class.
+        handler_class_attrs = {
+                'model':model
+        }
+        if fields:
+            handler_class_attrs['fields']=fields
+
+        handler_class = type(handler_class_name, (klass.handler_klass,), handler_class_attrs)
+        handler = Resource(handler_class)
+
+        #TODO: figure out how you want to handle api/fis/fi
+        return patterns('',
+            (r'^%s/'%alternate_url_prefix,
+                include(
+                    patterns('',
+                        url(r'^$', handler,  {'emitter_format': 'ext-json'}, name='list'),
+                        url(r'^(?P<id>\d+)/$', handler, {'emitter_format': 'ext-json'}, name='show'),
+                    ), namespace=alternate_url_prefix, app_name=alternate_url_prefix
+                )
+            ),
+        )
+
+
 
 class BaseGenericAPIEngine(object):
     # you will have to extend the view classes and then override these
@@ -64,4 +118,3 @@ class BaseGenericAPIEngine(object):
                 )
             ),
         )
-
