@@ -36,24 +36,81 @@ def get_object_or_404(klass,*args, **kwargs):
         resp.write('No %s matches the given query.' % queryset.model._meta.object_name)
         return resp
 
-class BaseExtHandler(PistonBaseHandler):
-    def get_object(self,*args, **kwargs):
-        rslt = get_object_or_404(self.model,*args,**kwargs)
-        return rslt 
+class HandlerSearchTermMixin(object):
+    '''
+    Usage:
+    term=search_term
 
-    #TODO : name this something different and move the list making somewhere else
-    def get_queryset(self, rqst, *args, **kwargs):
-        """
-        Uses filter() to return a list of objects, or raise a Http404 exception if
-        the list is empty.
+    This mixin allows for a term to be looked for across multiple
+    search fields (as defined in the search_fields attribute of the
+    overriding handler class
 
-        """
-        queryset = self.model.objects.all()
+    Performs an 'or' filter for every search field and then distincts.
+    '''
+    search_fields = None
+    def queryset(self, rqst, *args, **kwargs):
+        print "HandlerSearchTermMixin.start"
+        queryset = super(HandlerSearchTermMixin,self).queryset(rqst, *args, **kwargs)
+        print "HandlerSearchTermMixin.super"
+
+        if 'term' in rqst.GET:
+            term = rqst.GET['term']
+
+            # Apply keyword searches.
+            def construct_search(field_name):
+                if field_name.startswith('^'):
+                    return "%s__istartswith" % field_name[1:]
+                elif field_name.startswith('='):
+                    return "%s__iexact" % field_name[1:]
+                elif field_name.startswith('@'):
+                    return "%s__search" % field_name[1:]
+                else:
+                    return "%s__icontains" % field_name
+
+            if self.__class__.search_fields:
+                or_queries = [
+                    Q(**{construct_search(str(field_name)): term}) 
+                        for field_name in self.search_fields]
+
+                queryset = queryset.filter(reduce(operator.or_, or_queries))
+                for field_name in self.search_fields:
+                    if '__' in field_name:
+                        queryset = queryset.distinct()
+                        break
+
+class HandlerFilterMixin(object):
+    '''
+    Usage:
+    filter={"foo":"1234",...}
+
+    This mixin allow you to pass a json dictionary to the
+    django .filter() for this queryset
+    '''
+    def queryset(self, rqst, *args, **kwargs):
+        print "HandlerFilterMixin.start"
+        queryset = super(HandlerFilterMixin,self).queryset(rqst, *args, **kwargs)
+        print "HandlerFilterMixin.super"
         if 'filter' in rqst.GET:
             s = rqst.GET['filter']
+            print s
             data = deserialize(s)
+            print data
             queryset=queryset.filter(**data)
+        print "HandlerFilterMixin.end"
+        return queryset
 
+class HandlerSortMixin(object):
+    '''
+    Usage:
+    sort=[{"property":"foo","direction":"[ASC|DESC]"},...]
+
+    This mixin allows you to pass a json structure
+    to the django .order_by() for this queryset
+    '''
+    def queryset(self, rqst, *args, **kwargs):
+        print "HandlerSortMixin.start"
+        queryset = super(HandlerSortMixin,self).queryset(rqst, *args, **kwargs)
+        print "HandlerSortMixin.super"
         #[{"property":"holding_id","direction":"ASC"}]
         if 'sort' in rqst.GET:
             s = rqst.GET['sort']
@@ -62,7 +119,18 @@ class BaseExtHandler(PistonBaseHandler):
                 *['%s%s'%('DESC'==d['direction'] and '-' or '',d['property']) \
                         for d in data]
             )
-        totalCount = queryset.count() 
+        print "HandlerSortMixin.end"
+        return queryset
+
+class HandlerPagingMixin(object):
+    def queryset(self, rqst, *args, **kwargs):
+        print "HandlerPagingMixin.start"
+        queryset = super(HandlerPagingMixin,self).queryset(rqst, *args, **kwargs)
+        print "HandlerPagingMixin.super"
+
+        print hasattr(self,'totalCount')
+
+        self.totalCount = queryset.count() 
 
         if 'limit' in rqst.GET:
             limit = 25
@@ -80,7 +148,36 @@ class BaseExtHandler(PistonBaseHandler):
 
             queryset = queryset[start:end]
 
-        return (totalCount,queryset)
+        print "HandlerPagingMixin.end"
+        return queryset
+
+
+class BaseExtHandler(
+        HandlerPagingMixin,
+        HandlerSortMixin,
+        HandlerFilterMixin,
+        HandlerSearchTermMixin,
+        PistonBaseHandler):
+
+    def get_object(self,*args, **kwargs):
+        rslt = get_object_or_404(self.model,*args,**kwargs)
+        return rslt 
+
+    #TODO : name this something different and move the list making somewhere else
+    def queryset(self, rqst, *args, **kwargs):
+        """
+        Uses filter() to return a list of objects, or raise a Http404 exception if
+        the list is empty.
+
+        """
+        print "BaseExtHandler.start"
+        queryset = super(BaseExtHandler,self).queryset(rqst, *args, **kwargs)
+        print "BaseExtHandler.super"
+        if not hasattr(self,'totalCount'):
+            print 'base no totalCount'
+            self.totalCount = queryset.count()
+        print "BaseExtHandler.end"
+        return (self.totalCount,queryset)
 
 
 # helper baseclass
@@ -92,7 +189,7 @@ class BaseExtHandler(PistonBaseHandler):
         if id:
             return self.get_object(pk=id)
         else:
-            totalCount,queryset = self.get_queryset(rqst)
+            totalCount,queryset = self.queryset(rqst)
             obj_list = [obj for obj in queryset]
             if not obj_list:
                 print "No Object List"
@@ -143,70 +240,23 @@ class BaseExtHandler(PistonBaseHandler):
         # on DELETE
         return super(BaseExtHandler,self).delete(rqst,*args,**kwargs)
 
-class BaseAutoCompleterHandler(PistonBaseHandler):
-    search_fields = None
-
-    def get_queryset(self, rqst, *args, **kwargs):
-        """
-        Uses filter() to return a list of objects, or raise a Http404 exception if
-        the list is empty.
-
-        this version requires search_fields
-        """
-        queryset = self.model.objects.all()
-        if 'term' in rqst.GET:
-            term = rqst.GET['term']
-
-            # Apply keyword searches.
-            def construct_search(field_name):
-                if field_name.startswith('^'):
-                    return "%s__istartswith" % field_name[1:]
-                elif field_name.startswith('='):
-                    return "%s__iexact" % field_name[1:]
-                elif field_name.startswith('@'):
-                    return "%s__search" % field_name[1:]
-                else:
-                    return "%s__icontains" % field_name
-
-            if self.__class__.search_fields:
-                or_queries = [Q(**{construct_search(str(field_name)): term}) for field_name in self.search_fields]
-
-                queryset = queryset.filter(reduce(operator.or_, or_queries))
-                for field_name in self.search_fields:
-                    if '__' in field_name:
-                        queryset = queryset.distinct()
-                        break
-
-        if 'limit' in rqst.GET:
-            print 'has limit'
-            limit = 25
-            if 'limit' in rqst.GET:
-                limit = rqst.GET['limit']
-            page = 1
-            if 'page' in rqst.GET:
-                print 'has page'
-                page = int(rqst.GET['page'])
-
-            end = limit * page
-
-            start = 0
-            if 'start' in rqst.GET:
-                print 'has start'
-                start = int(rqst.GET['start'])
-
-            print limit
-            print page
-            print start
-            queryset = queryset[start:end]
-
-        return queryset
-    
+class BaseAutoCompleterHandler(
+        HandlerPagingMixin,
+        HandlerSortMixin,
+        HandlerFilterMixin,
+        HandlerSearchTermMixin,
+        PistonBaseHandler):
+    '''
+    This is only meant for reads for the autocompleters
+    (until I switch everything out for ext)
+    '''
+        
     def get_value_and_label(self,obj):
         return {'label':str(obj),
                  'value':obj.pk}
 
-    def read(self,rqst):
-        queryset = self.get_queryset(rqst)
+    def read(self,rqst,*args,**kwargs):
+        queryset = self.queryset(rqst,*args,**kwargs)
         obj_list = [self.get_value_and_label(obj) for obj in queryset]
         return obj_list      
 
