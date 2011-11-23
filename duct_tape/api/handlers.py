@@ -72,11 +72,16 @@ class HandlerSearchTermMixin(object):
                     Q(**{construct_search(str(field_name)): term}) 
                         for field_name in self.search_fields]
 
+                for o_q in or_queries:
+                    print queryset.filter(o_q).count()
                 queryset = queryset.filter(reduce(operator.or_, or_queries))
                 for field_name in self.search_fields:
                     if '__' in field_name:
                         queryset = queryset.distinct()
                         break
+
+        print "HandlerSearchTermMixin.end"
+        return queryset
 
 class HandlerFilterMixin(object):
     '''
@@ -240,10 +245,7 @@ class BaseExtHandler(
         # on DELETE
         return super(BaseExtHandler,self).delete(rqst,*args,**kwargs)
 
-class BaseAutoCompleterHandler(
-        HandlerPagingMixin,
-        HandlerSortMixin,
-        HandlerFilterMixin,
+class BaseAutoCompleteHandler(
         HandlerSearchTermMixin,
         PistonBaseHandler):
     '''

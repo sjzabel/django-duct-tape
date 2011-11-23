@@ -1,5 +1,5 @@
 from django.conf.urls.defaults import *
-from duct_tape.api.handlers import BaseHandler, BaseAutoCompleterHandler
+from duct_tape.api.handlers import BaseHandler, BaseAutoCompleteHandler
 from duct_tape.api.handlers import BaseExtHandler
 from piston.resource import Resource
 
@@ -59,7 +59,7 @@ class BaseGenericExtAPIEngine(object):
 class BaseGenericAPIEngine(object):
     # you will have to extend the view classes and then override these
     handler_klass = BaseHandler
-    autocomplete_handler_klass = BaseAutoCompleterHandler
+    autocomplete_handler_klass = BaseAutoCompleteHandler
 
     @classmethod
     def get_patterns(

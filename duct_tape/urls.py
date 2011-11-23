@@ -107,7 +107,7 @@ class BaseGenericViewEngine(object):
             'url_update_path':"%s:update"%app_path,
             'url_delete_path':"%s:delete"%app_path,
             'url_create_path':"%s:create"%app_path,
-            'url_api_autocomplete_path':"%s:api:%s:autocomplete_list"%(api_path,alternate_url_prefix),
+            'url_api_autocomplete_path':"api:%s:%sac:list"%(api_path,alternate_url_prefix),
         }
 
         view_data.update(**kwargs)
