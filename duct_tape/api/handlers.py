@@ -49,9 +49,7 @@ class HandlerSearchTermMixin(object):
     '''
     search_fields = None
     def queryset(self, rqst, *args, **kwargs):
-        print "HandlerSearchTermMixin.start"
         queryset = super(HandlerSearchTermMixin,self).queryset(rqst, *args, **kwargs)
-        print "HandlerSearchTermMixin.super"
 
         if 'term' in rqst.GET:
             term = rqst.GET['term']
@@ -72,15 +70,12 @@ class HandlerSearchTermMixin(object):
                     Q(**{construct_search(str(field_name)): term}) 
                         for field_name in self.search_fields]
 
-                for o_q in or_queries:
-                    print queryset.filter(o_q).count()
                 queryset = queryset.filter(reduce(operator.or_, or_queries))
                 for field_name in self.search_fields:
                     if '__' in field_name:
                         queryset = queryset.distinct()
                         break
 
-        print "HandlerSearchTermMixin.end"
         return queryset
 
 class HandlerFilterMixin(object):
@@ -92,16 +87,11 @@ class HandlerFilterMixin(object):
     django .filter() for this queryset
     '''
     def queryset(self, rqst, *args, **kwargs):
-        print "HandlerFilterMixin.start"
         queryset = super(HandlerFilterMixin,self).queryset(rqst, *args, **kwargs)
-        print "HandlerFilterMixin.super"
         if 'filter' in rqst.GET:
             s = rqst.GET['filter']
-            print s
             data = deserialize(s)
-            print data
             queryset=queryset.filter(**data)
-        print "HandlerFilterMixin.end"
         return queryset
 
 class HandlerSortMixin(object):
@@ -113,9 +103,7 @@ class HandlerSortMixin(object):
     to the django .order_by() for this queryset
     '''
     def queryset(self, rqst, *args, **kwargs):
-        print "HandlerSortMixin.start"
         queryset = super(HandlerSortMixin,self).queryset(rqst, *args, **kwargs)
-        print "HandlerSortMixin.super"
         #[{"property":"holding_id","direction":"ASC"}]
         if 'sort' in rqst.GET:
             s = rqst.GET['sort']
@@ -124,16 +112,12 @@ class HandlerSortMixin(object):
                 *['%s%s'%('DESC'==d['direction'] and '-' or '',d['property']) \
                         for d in data]
             )
-        print "HandlerSortMixin.end"
         return queryset
 
 class HandlerPagingMixin(object):
     def queryset(self, rqst, *args, **kwargs):
-        print "HandlerPagingMixin.start"
         queryset = super(HandlerPagingMixin,self).queryset(rqst, *args, **kwargs)
-        print "HandlerPagingMixin.super"
 
-        print hasattr(self,'totalCount')
 
         self.totalCount = queryset.count() 
 
@@ -153,7 +137,6 @@ class HandlerPagingMixin(object):
 
             queryset = queryset[start:end]
 
-        print "HandlerPagingMixin.end"
         return queryset
 
 
@@ -175,17 +158,10 @@ class BaseExtHandler(
         the list is empty.
 
         """
-        print "BaseExtHandler.start"
         queryset = super(BaseExtHandler,self).queryset(rqst, *args, **kwargs)
-        print "BaseExtHandler.super"
         if not hasattr(self,'totalCount'):
-            print 'base no totalCount'
             self.totalCount = queryset.count()
-        print "BaseExtHandler.end"
         return (self.totalCount,queryset)
-
-
-# helper baseclass
 
     def read(self,rqst,id=None):
         log.debug('READ')
@@ -197,7 +173,6 @@ class BaseExtHandler(
             totalCount,queryset = self.queryset(rqst)
             obj_list = [obj for obj in queryset]
             if not obj_list:
-                print "No Object List"
                 resp = rc.NOT_FOUND
                 resp.write('No %s matches the given query.' % queryset.model._meta.object_name)
                 return resp

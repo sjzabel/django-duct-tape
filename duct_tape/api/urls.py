@@ -1,5 +1,6 @@
 from django.conf.urls.defaults import *
-from duct_tape.api.handlers import BaseHandler, BaseAutoCompleteHandler
+from piston.handler import BaseHandler
+from duct_tape.api.handlers import BaseAutoCompleteHandler
 from duct_tape.api.handlers import BaseExtHandler
 from piston.resource import Resource
 
