@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 try:
-    from setuptools import setup, find_packages
+    from setuptools import setup
 except ImportError:
     import ez_setup
     ez_setup.use_setuptools()
-    from setuptools import setup, find_packages
+    from setuptools import setup
     
 import os
 
@@ -19,9 +19,9 @@ setup(
     description = "Duct tape is a collection of tools and utilites that I find helpful for a django app",
     author = 'Stephen J. Zabel',
     author_email = 'sjzabel@gmail.com',
-    packages = find_packages(),
-    namespace_packages = ['duct_tape'],
-    include_package_data = True,
+    packages = ['duct_tape'],
+    #namespace_packages = ['duct_tape'],
+    #include_package_data = True,
     zip_safe = False,
     classifiers = [
         'Development Status :: 3 - Alpha',
