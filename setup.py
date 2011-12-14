@@ -22,7 +22,7 @@ setup(
     author = 'Stephen J. Zabel',
     author_email = 'sjzabel@gmail.com',
     #packages = ['duct_tape'],
-    packages = find_packages('duct_tape'),
+    packages = find_packages('.'),
     classifiers = [
         'Development Status :: 3 - Alpha',
         'Framework :: Django',
