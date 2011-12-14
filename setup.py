@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 try:
-    from setuptools import setup
+    from setuptools import setup, find_packages
 except ImportError:
     import ez_setup
     ez_setup.use_setuptools()
-    from setuptools import setup
+    from setuptools import setup, find_packages
     
 import os
 
