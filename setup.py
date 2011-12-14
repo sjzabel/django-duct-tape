@@ -20,9 +20,6 @@ setup(
     author = 'Stephen J. Zabel',
     author_email = 'sjzabel@gmail.com',
     packages = ['duct_tape'],
-    #namespace_packages = ['duct_tape'],
-    #include_package_data = True,
-    zip_safe = False,
     classifiers = [
         'Development Status :: 3 - Alpha',
         'Framework :: Django',
