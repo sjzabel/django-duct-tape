@@ -19,7 +19,8 @@ setup(
     description = "Duct tape is a collection of tools and utilites that I find helpful for a django app",
     author = 'Stephen J. Zabel',
     author_email = 'sjzabel@gmail.com',
-    packages = ['duct_tape'],
+    #packages = ['duct_tape'],
+    packages = find_packages('django-duct-tape'),
     classifiers = [
         'Development Status :: 3 - Alpha',
         'Framework :: Django',
