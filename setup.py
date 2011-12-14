@@ -10,6 +10,8 @@ except ImportError:
     
 import os
 
+print find_packages('duct_tape')
+
 setup(
     name = "django-duct-tape",
     version = "0.3",
@@ -20,7 +22,7 @@ setup(
     author = 'Stephen J. Zabel',
     author_email = 'sjzabel@gmail.com',
     #packages = ['duct_tape'],
-    packages = find_packages('django-duct-tape'),
+    packages = find_packages('duct_tape'),
     classifiers = [
         'Development Status :: 3 - Alpha',
         'Framework :: Django',
