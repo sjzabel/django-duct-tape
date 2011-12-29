@@ -23,6 +23,15 @@ setup(
     author_email = 'sjzabel@gmail.com',
     #packages = ['duct_tape'],
     packages = find_packages('.'),
+    package_data = {
+        'duct_tape': [
+            'templates/duct_tape/*.html',
+            'templates/duct_tape/forms/*.html',
+            'templates/duct_tape/layouts/*.html',
+            'templates/duct_tape/widgets/*.html',
+            'static/*',
+        ],
+    },
     classifiers = [
         'Development Status :: 3 - Alpha',
         'Framework :: Django',
